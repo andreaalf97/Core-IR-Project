@@ -8,3 +8,5 @@
 ### Useful Links
 * [Paper to reproduce](https://arxiv.org/pdf/1802.06159.pdf)
 * [Paper Github Repository](https://github.com/iai-group/www2018-table)
+---
+* [WikiTables documentation](https://wikitables.readthedocs.io/en/latest/)
