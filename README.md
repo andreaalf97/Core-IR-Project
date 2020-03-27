@@ -4,6 +4,7 @@
 ### Group members
 * Avinash Saravanan - 4993381 - [@asarav](https://github.com/asarav)
 * Andrea Alfieri - 5128315 - [@andreaalf97](https://github.com/andreaalf97)
+* Jasper van Esveld - 4372581 - [@GitHubJasper](https://github.com/GitHubJasper)
 
 ### Useful Links
 * [Paper to reproduce](https://arxiv.org/pdf/1802.06159.pdf)
