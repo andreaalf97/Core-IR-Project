@@ -12,3 +12,4 @@
 ---
 * [WikiTables Link provided by paper](http://websail-fe.cs.northwestern.edu/TabEL/)
 * [WikiTables documentation](https://wikitables.readthedocs.io/en/latest/)
+* [Preprocessed Dataset provided by authors of the paper](http://iai.group/downloads/smart_table/WP_tables.zip)
