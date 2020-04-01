@@ -2,31 +2,35 @@ import requests
 
 class WikiApiCategories:
     def __init__(self):
-        self.S = requests.Session()
-        self.URL = "https://en.wikipedia.org/w/api.php"
-        self.data = []
+        self.S = requests.Session()  # Opens the session when the class is instantiated
+        self.URL = "https://en.wikipedia.org/w/api.php"  # The URL of the API
 
     def get_data(self, pageTitle):
-        self.data = []
-        PARAMS = {
+        '''Sends a request to the Wikipedia API and returns the category of the page given by pageTitle'''
+
+        # The parameters for the query
+        params = {
             "action": "query",
             "format": "json",
             "prop": "categories",
             "titles": pageTitle
         }
 
-        R = self.S.get(url=self.URL, params=PARAMS)
-        DATA = R.json()
+        response = self.S.get(url=self.URL, params=params)  # Sends the request and waits for the response
+        response = response.json()  # Cast the response to a JSON object
 
-        PAGES = DATA["query"]["pages"]
+        print(response)
 
-        for k, v in PAGES.items():
+        pages = response["query"]["pages"]
+
+        data = []
+        for k, v in pages.items():
             if 'categories' in v:
                 for cat in v['categories']:
                     title = cat["title"]
                     prefix = "Category:"
                     if title.startswith(prefix):
-                        self.data.append(title[len(prefix):])
+                        data.append(title[len(prefix):])
                     else:
-                        self.data.append(title)
-        return self.data
+                        data.append(title)
+        return data

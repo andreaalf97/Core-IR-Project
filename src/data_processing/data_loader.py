@@ -13,23 +13,18 @@ class data_loader:
     end = 1653 + 1
     data_location = "../resources/data/"
     currentIndex = start
-    currentData = None
 
     def __init__(self, startingIndex=1):
         self.currentIndex = startingIndex
 
     def load_file_data(self, incrementCurrentIndex=False):
-        # If the file name exists, write a JSON string into the file.
-        filename = self.get_data_file_location()
-        if filename:
-            # Writing JSON data
-            with open(filename, 'r') as f:
-                self.currentData = json.load(f)
-                if incrementCurrentIndex:
-                    self.currentIndex = self.currentIndex + 1
-                return self.currentData
+        filename = self.get_data_file_location()  # Retrieves the name of the file we currently have to open
+        with open(filename, 'r') as f:
+            currentData = json.load(f)
+            self.currentIndex += (1 if incrementCurrentIndex else 0)  # Increments the index only if required
+        return currentData
 
-    def get_table_ids(self, data):
+    def get_table_ids(self, data) -> []:
         tables = []
         for table in data:
             tables.append(table)
