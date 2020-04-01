@@ -2,11 +2,16 @@ import json
 from pandas import json_normalize
 
 class data_loader:
+    '''
+    This class is used to load the data recursively and contains all the necessary parameters.
+    Table files are saved as 're_tables-*.json' where * is a 4 digit integer starting from 0001
+    '''
+
     filePrefix = "re_tables-"
     suffix = ".json"
     start = 1
     end = 1653 + 1
-    data_location = "../data/"
+    data_location = "../resources/data/"
     currentIndex = start
     currentData = None
 
@@ -30,7 +35,8 @@ class data_loader:
             tables.append(table)
         return tables
 
-    def convert_number_to_string(self, number):
+    def convert_number_to_string(self, number: int) -> str:
+        '''Converts an integer to a string'''
         zeros = 4 - len(str(number))
         prefixString = ""
         for i in range(0, zeros):
@@ -38,5 +44,8 @@ class data_loader:
         value = prefixString + str(number)
         return value
 
-    def get_data_file_location(self):
+    def get_data_file_location(self) -> str:
+        '''Returns the string of the data path'''
         return self.data_location + self.filePrefix + self.convert_number_to_string(self.currentIndex) + self.suffix
+
+help(data_loader)
