@@ -1,6 +1,3 @@
-import json
-from pandas import json_normalize
-
 class query_loader:
     fileLocation = "../data/query_data/queries.txt"
     # Data will have the following format: an array containing an array with 2 elements.
