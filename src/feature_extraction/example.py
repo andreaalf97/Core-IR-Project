@@ -1,7 +1,12 @@
 from src.data_processing import data_loader
-import pandas as pd
+from src.data_processing import relevance_loader
+from src.data_processing import query_loader
 
 loader = data_loader.data_loader()
+relevance = relevance_loader.relevance_loader()
+print(relevance.data)
+queries = query_loader.query_loader()
+print(queries.data)
 
 for i in range(loader.start, loader.end):
     loader.load_file_data(incrementCurrentIndex=True)
