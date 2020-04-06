@@ -1,3 +1,6 @@
+import os
+dirname = os.path.dirname(__file__)
+
 # This is a class that reads in data from the qrels txt file and stores it in an array
 class relevance_loader:
     fileLocation = "../data/query_data/qrels.txt"
@@ -7,7 +10,7 @@ class relevance_loader:
 
     def __init__(self):
         # Read from txt file
-        f = open(self.fileLocation, "r")
+        f = open(os.path.join(dirname, self.fileLocation), "r")
         # Split into elements by \n
         unparsedData = str.splitlines(f.read())
         for i in range(0, len(unparsedData)):

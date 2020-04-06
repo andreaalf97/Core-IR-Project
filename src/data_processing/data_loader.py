@@ -1,5 +1,7 @@
 import json
 from pandas import json_normalize
+import os
+dirname = os.path.dirname(__file__)
 
 class data_loader:
     filePrefix = "re_tables-"
@@ -27,8 +29,9 @@ class data_loader:
 
     def load_preprocessed_data(self):
         # Reading JSON data
-        with open(self.prepocessedDataFile, 'r') as f:
-            return json.load(f)
+        with open(os.path.join(dirname, self.prepocessedDataFile), 'r') as f:
+            self.currentData = json.load(f)
+            return self.currentData
 
     def get_table_ids(self, data):
         tables = []
@@ -45,4 +48,4 @@ class data_loader:
         return value
 
     def get_data_file_location(self):
-        return self.data_location + self.filePrefix + self.convert_number_to_string(self.currentIndex) + self.suffix
+        return os.path.join(dirname, self.data_location + self.filePrefix + self.convert_number_to_string(self.currentIndex) + self.suffix)

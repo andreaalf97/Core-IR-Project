@@ -1,3 +1,6 @@
+import os
+dirname = os.path.dirname(__file__)
+
 class query_loader:
     fileLocation = "../data/query_data/queries.txt"
     # Data will have the following format: an array containing an array with 2 elements.
@@ -7,7 +10,7 @@ class query_loader:
 
     def __init__(self):
         # Read from txt file
-        f = open(self.fileLocation, "r")
+        f = open(os.path.join(dirname, self.fileLocation), "r")
         # Split into elements by \n
         unparsedData = str.splitlines(f.read())
         for i in range(0, len(unparsedData)):

@@ -9,7 +9,7 @@ queries = query_loader.query_loader()
 print(queries.data)
 
 for i in range(loader.start, loader.end):
-    loader.load_file_data(incrementCurrentIndex=True)
+    loader.load_preprocessed_data()
     tables = loader.get_table_ids(data=loader.currentData)
     #Use an inner loop to get the individual data
     for j in range(0, len(tables)):
