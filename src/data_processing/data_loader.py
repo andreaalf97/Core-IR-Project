@@ -9,6 +9,7 @@ class data_loader:
     data_location = "../data/"
     currentIndex = start
     currentData = None
+    prepocessedDataFile = "../data/data.json"
 
     def __init__(self, startingIndex=1):
         self.currentIndex = startingIndex
@@ -23,6 +24,11 @@ class data_loader:
                 if incrementCurrentIndex:
                     self.currentIndex = self.currentIndex + 1
                 return self.currentData
+
+    def load_preprocessed_data(self):
+        # Reading JSON data
+        with open(self.prepocessedDataFile, 'r') as f:
+            return json.load(f)
 
     def get_table_ids(self, data):
         tables = []
