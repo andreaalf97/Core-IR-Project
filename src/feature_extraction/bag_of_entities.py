@@ -19,7 +19,7 @@ def get_dbpedia_entities(cell):
         sparql.setReturnFormat(JSON)
 
         # This query gets the top 10 rdf:type values of an entity
-        query = 'SELECT DISTINCT ?o WHERE { dbr:' + match.group(1) + ' ?p ?o } LIMIT 10'
+        query = 'SELECT DISTINCT ?o WHERE { dbr:' + match.group(1) + ' ?p ?o } LIMIT 20'
         sparql.setQuery(query)
 
         # Map results to a list of types
