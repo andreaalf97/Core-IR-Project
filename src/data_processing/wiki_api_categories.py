@@ -1,4 +1,5 @@
 import requests
+from src.data_processing.wiki_data_entity_loader import WikiDataEntityLoader
 
 class WikiApiCategories:
     def __init__(self):
@@ -30,3 +31,7 @@ class WikiApiCategories:
                     else:
                         self.data.append(title)
         return self.data
+
+    def getCategoryByEntity(self, entityId):
+        loader = EntityLoader()
+        loader.retrieveEntityByName(entityId)
