@@ -28,7 +28,7 @@ def get_dbpedia_entities(cell):
         return list(types)
 
 
-def get_content_entities(table):
+def get_core_column_entities(table):
     if len(table) == 0:
         return []
     column_entities = [[] for x in range(len(table[0]))]
@@ -55,4 +55,4 @@ for i in range(loader.start, loader.end):
         if 'secondTitle' in loader.currentData[tableID]:
             print(loader.currentData[tableID]['secondTitle'])
         if 'data' in loader.currentData[tableID]:
-            print(get_content_entities(loader.currentData[tableID]['data']))
+            print(get_core_column_entities(loader.currentData[tableID]['data']))
