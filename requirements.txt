@@ -1,3 +1,4 @@
+qwikidata
 pandas
 requests
 certifi==2019.11.28

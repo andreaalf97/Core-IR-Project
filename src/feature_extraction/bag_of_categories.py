@@ -1,24 +1,24 @@
+from src.data_processing import relevance_loader
 from src.data_processing import data_loader
-from src.data_processing.wiki_api_categories import WikiApiCategories
+from src.data_processing import query_loader
 import pandas as pd
-from datetime import datetime
 
 loader = data_loader.data_loader()
-categoryLoader = WikiApiCategories()
+queries = query_loader.query_loader()
+relevance = relevance_loader.relevance_loader()
 
-df = pd.DataFrame()
+table_data = loader.load_preprocessed_data()
+
 print("Started Processing")
-for i in range(loader.start, loader.end):
-    print(datetime.now())
-    print(i)
-    loader.load_file_data(incrementCurrentIndex=True)
-    tables = loader.get_table_ids(data=loader.currentData)
-    #Use an inner loop to get the individual data
-    for j in range(0, len(tables)):
-        tableID = tables[j]
-        # Get category by page title
-        if 'pgTitle' in loader.currentData[tableID]:
-            categories = categoryLoader.get_data(loader.currentData[tableID]['pgTitle'])
+count = 0
+for i in range(0, len(queries.data)):
+    df = pd.DataFrame()
+    queryNumber = i + 1
+    for j in range(0, len(relevance.data)):
+        if int(relevance.data[j][0]) is queryNumber:
+            tableID = relevance.data[j][1]
+            table = table_data[tableID]
+            categories = table["categories"]
             categoryFrameColumns = []
             rowValues = []
             #Construct row
@@ -29,4 +29,15 @@ for i in range(loader.start, loader.end):
             categoryFrame = pd.DataFrame(data=[rowValues], columns=categoryFrameColumns, index=[tableID])
             df = df.append(categoryFrame).fillna(0)
             categories = None
-df.to_csv("bag_of_categories.csv")
+    # Add row for query?
+    '''
+    queryFrameColumns = []
+    rowValues = []
+    for j in range(0, len(queries.data[i][1])):
+        term = queries.data[i][1][j]
+        rowValues.append(1)
+        queryFrameColumns.append(term)
+    queryFrame = pd.DataFrame(data=[rowValues], columns=queryFrameColumns, index=["query " + str(i)])
+    df = df.append(queryFrame).fillna(0)
+    '''
+    df.to_csv("bag_of_categories/bag_of_categories_" + str(queryNumber) + ".csv")
