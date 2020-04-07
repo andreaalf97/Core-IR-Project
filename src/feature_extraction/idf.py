@@ -1,5 +1,3 @@
-from typing import List
-
 from src.data_processing.data_loader import data_loader
 from src.data_processing.query_loader import query_loader
 from src.utils.table import Table
@@ -9,8 +7,9 @@ import pandas as pd
 
 def queryIDF(query: list, tables: list) -> dict:
     '''
-    query is the query I'm considering now, given as a list of words (strings).
-    But tables is the list of ALL tables in the collection, given as a list of Table objects
+    This function returns the IDF scores of ONE query against ALL tables
+    @:param query is the query I'm considering now, given as a list of words (strings).
+    @:param tables is the list of ALL tables in the collection, given as a list of Table objects
     '''
 
     idf = {
@@ -22,8 +21,11 @@ def queryIDF(query: list, tables: list) -> dict:
         "all": 0
     }
 
+    # The IDF score of a query is the SUM of IDF scores of its words
     for word in query:
 
+        # Counts how many times each word is repeated across different
+        # fields (and the concatenation of the entire table)
         occurrencies = {
             "pageTitle": 0,
             "sectionTitle": 0,
@@ -60,6 +62,7 @@ def queryIDF(query: list, tables: list) -> dict:
             if word in allTerms:
                 occurrencies["all"] += 1
 
+        # After checking all tables
         for v in occurrencies:
             idf[v] += round(
                 math.log( (len(tables) - occurrencies[v] + 0.5) / (occurrencies[v] + 0.5)),
@@ -87,15 +90,6 @@ if __name__ == '__main__':
     if "pageTitle_idf" in df:
         print("The IDF features are already in the CSV file")
         exit(-1)
-
-
-    # Create all the new columns
-    # df = df.assign(IDF_pageTitle=[0 for i in range(len(df))])
-    # df = df.assign(IDF_sectionTitle=[0 for i in range(len(df))])
-    # df = df.assign(IDF_tableCaption=[0 for i in range(len(df))])
-    # df = df.assign(IDF_tableHeading=[0 for i in range(len(df))])
-    # df = df.assign(IDF_tableBody=[0 for i in range(len(df))])
-    # df = df.assign(IDF_all=[0 for i in range(len(df))])
 
     pageTitle_idf = []
     sectionTitle_idf = []
@@ -128,6 +122,7 @@ if __name__ == '__main__':
             tableBody_idf.append("%.4f" % query_idf["tableBody"])
             all_idf.append("%.4f" % query_idf["all"])
 
+    # Finally, we add the new columns to the dataframe and save it in the CSV file
     df["pageTitle_idf"] = pageTitle_idf
     df["sectionTitle_idf"] = sectionTitle_idf
     df["tableCaption_idf"] = tableCaption_idf
@@ -135,7 +130,7 @@ if __name__ == '__main__':
     df["tableBody_idf"] = tableBody_idf
     df["all_idf"] = all_idf
 
-    print(df)
-
     with open("../resources/extracted_features/features.csv", "w") as file:
         df.to_csv(file)
+
+    exit(0)
