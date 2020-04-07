@@ -2,7 +2,7 @@ import os
 dirname = os.path.dirname(__file__)
 
 class query_loader:
-    fileLocation = "../data/query_data/queries.txt"
+    fileLocation = "../resources/query_data/queries.txt"
     # Data will have the following format: an array containing an array with 2 elements.
     # The first element will contain the query number. The second element will contain the individual words for the query.
     # Element 0 corresponds to query 1
