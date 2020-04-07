@@ -32,6 +32,10 @@ class WikiApiCategories:
                         self.data.append(title)
         return self.data
 
-    def getCategoryByEntity(self, entityId):
-        loader = EntityLoader()
-        loader.retrieveEntityByName(entityId)
+    def getCategoryByEntityId(self, entityId):
+        loader = WikiDataEntityLoader()
+        entity = loader.retrieveEntityByID(entityId)
+        if "title" in entity:
+            return self.get_data(entity["title"])
+        else:
+            return []

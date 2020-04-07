@@ -6,6 +6,7 @@ class WikiDataEntityLoader:
     def __init__(self):
         self.S = requests.Session()
         self.wikiDataUrl = "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&sites=enwiki&normalize=1&titles="
+        self.wikiDataEntityIDUrl = "https://www.wikidata.org/wiki/Special:EntityData/"
 
     #When provided with a string, it tries to get an entity in Wikipedia that matches that
     def retrieveEntityByName(self, entityString):
@@ -18,6 +19,15 @@ class WikiDataEntityLoader:
         entity = entities[entityId]
         label = entity["labels"]["en"]["value"]
         return {'id': entityId, 'title': label}
+
+    def retrieveEntityByID(self, entityID):
+        # Get entity by id
+        R = self.S.get(url=self.wikiDataEntityIDUrl + entityID + ".json")
+        DATA = R.json()
+        entity = DATA["entities"][entityID]
+        label = entity["labels"]["en"]["value"]
+        return {'id': entityID, 'title': label}
+
 
     # When provided with an entity, try to find all related main entities.
     # Allows for just a small number of entities to be returned if needed.
