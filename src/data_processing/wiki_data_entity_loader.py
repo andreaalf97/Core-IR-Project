@@ -1,11 +1,12 @@
 import requests
 from qwikidata.linked_data_interface import get_entity_dict_from_api
 
-# This is a class used for handling entities from WikiData
+# This is a class used for handling entities from WikiData.
+# Uses the following api
 class WikiDataEntityLoader:
     def __init__(self):
         self.S = requests.Session()
-        self.wikiDataUrl = "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&sites=enwiki&normalize=1&titles="
+        self.wikiDataUrl = "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&sites=enwiki&languages=en&normalize=1&sitefilter=enwiki&titles="
         self.wikiDataEntityIDUrl = "https://www.wikidata.org/wiki/Special:EntityData/"
 
     #When provided with a string, it tries to get an entity in Wikipedia that matches that
