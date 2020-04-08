@@ -3,7 +3,7 @@ import pandas as pd
 import re
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-loader = data_loader.data_loader()
+loader = data_loader.DataLoader()
 
 df = pd.DataFrame()
 

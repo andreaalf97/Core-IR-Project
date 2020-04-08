@@ -4,9 +4,9 @@ from src.data_processing import query_loader
 import pandas as pd
 
 #This is a script that generates baseline features
-relevance = relevance_loader.relevance_loader()
-loader = data_loader.data_loader()
-queries = query_loader.query_loader()
+relevance = relevance_loader.RelevanceLoader()
+loader = data_loader.DataLoader()
+queries = query_loader.QueryLoader()
 featureColumns = ["queryNumber", "tableId", "queryContents", "relevance", "queryLength", "queryStringLength", "numCols", "numRows", "firstColHits", "secondColHits"]
 features = []
 

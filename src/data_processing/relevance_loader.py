@@ -2,7 +2,7 @@ import os
 dirname = os.path.dirname(__file__)
 
 # This is a class that reads in data from the qrels txt file and stores it in an array
-class relevance_loader:
+class RelevanceLoader:
     fileLocation = "../resources/query_data/qrels.txt"
     # The data will have the following format: It is a 2d array. Each array will contain 3 elements.
     # The elements are the query number, the table, and its relevance score in that order.
