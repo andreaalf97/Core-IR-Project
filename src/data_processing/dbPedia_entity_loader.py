@@ -9,9 +9,6 @@ class dbPediaEntityLoader:
         self.S = requests.Session()
         self.sparql = SPARQLWrapper("http://dbpedia.org/sparql")
 
-    def match_urls(self, cell):
-        return re.match(r'\[(\w*)\|(.*)\]', cell)
-
     def get_dbpedia_entities(self, entityString):
         # This query gets the top 10 rdf:type values of an entity
         query = '''SELECT DISTINCT ?s ( bif:search_excerpt ( bif:vector () , ?o ) ) WHERE {
@@ -27,11 +24,8 @@ class dbPediaEntityLoader:
         types = map(lambda x: x['s']['value'], entity['results']['bindings'])
         return list(types)
 
-    def get_dbpedia_entities_by_cell(self, cell):
-        match = self.match_urls(cell)
-        if match:
-            self.sparql.setReturnFormat(JSON)
-            return self.get_dbpedia_entities(match.group(1))
+    def get_url_ids(self, cell):
+        return list(map(lambda match: match[0], re.findall(r'\[(\w*)\|(.*)\]', cell)))
 
     def get_core_column_entities(self, table):
         if len(table) == 0:
@@ -39,9 +33,9 @@ class dbPediaEntityLoader:
         column_entities = [[] for x in range(len(table[0]))]
         for i in range(0, len(table)):
             for j in range(0, len(table[i])):
-                cell_entities = self.get_dbpedia_entities_by_cell(table[i][j])  # Get entities of a cell
+                cell_entities = self.get_url_ids(table[i][j])  # Get entities of a cell
                 if cell_entities:
-                    column_entities[j].append(cell_entities)  # Append entities to current column
+                    column_entities[j].extend(cell_entities)  # Append entities to current column
         return max(column_entities, key=len)  # Return core column with most entities
 
     # Takes the returned url of the entity and gets related categories
