@@ -1,6 +1,5 @@
-from src.data_processing.data_loader import data_loader
-from src.data_processing.query_loader import query_loader
-from src.utils.table import Table
+from src.data_processing.query_loader import QueryLoader
+from src.utils.globalLoaders import getQueryList, getTableList
 import math
 import pandas as pd
 
@@ -73,15 +72,10 @@ def queryIDF(query: list, tables: list) -> dict:
 
 
 if __name__ == '__main__':
-    df = data_loader()  # Create a new data_loader object
-    clean_data = df.load_preprocessed_data()  # load the tables from the clean data csv file
 
-    tables = []  # this will contain all the Table objects
-    for v in clean_data:
-        tables.append(Table(v, clean_data[v]))
-
-    ql = query_loader()  # Create a new query_loader object
-    queries: list = ql.data  # retrieve the queries as a list of [query_number, query_string]
+    tables = getTableList()  # this will contain all the Table objects
+    queries = getQueryList() # retrieve the queries as a list of [query_number, query_string]
+    print(type(queries[0][0]), type(queries[0][1]))
 
     # Open the csv feature file to add the new columns
     with open("../resources/extracted_features/features.csv", "r") as file:

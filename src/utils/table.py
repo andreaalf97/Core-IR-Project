@@ -1,4 +1,4 @@
-from src.data_processing.data_loader import data_loader
+from src.data_processing.data_loader import DataLoader
 
 class Table:
     '''This class is used to represent a table object and its parameters'''
@@ -40,7 +40,7 @@ class Table:
 
 
 if __name__ == '__main__':
-    dl = data_loader()  # Instantiate the data loader class
+    dl = DataLoader()  # Instantiate the data loader class
     data = dl.load_preprocessed_data()  # Loads the clean data
     for v in data:
         table = Table(v, data[v])  # Creates a Table object from the JSON file

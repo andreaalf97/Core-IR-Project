@@ -4,8 +4,8 @@ from src.data_processing.wiki_api_categories import WikiApiCategories
 import json
 
 #This is a script used for processing the 1.6m tables and retrieving just the tables that we need for unsupervised learning
-loader = data_loader.data_loader()
-relevance = relevance_loader.relevance_loader()
+loader = data_loader.DataLoader()
+relevance = relevance_loader.RelevanceLoader()
 categoryLoader = WikiApiCategories()
 
 data_set = {}
