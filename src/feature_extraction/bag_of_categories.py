@@ -3,9 +3,9 @@ from src.data_processing import data_loader
 from src.data_processing import query_loader
 import pandas as pd
 
-loader = data_loader.data_loader()
-queries = query_loader.query_loader()
-relevance = relevance_loader.relevance_loader()
+loader = data_loader.DataLoader()
+queries = query_loader.QueryLoader()
+relevance = relevance_loader.RelevanceLoader()
 
 table_data = loader.load_preprocessed_data()
 
