@@ -3,9 +3,10 @@ import pandas as pd
 from src.data_processing import dbPedia_entity_loader
 from src.data_processing.relevance_loader import relevance_loader
 
-loader = data_loader.data_loader()
-dbPediaLoader = dbPedia_entity_loader.dbPediaEntityLoader()
-relevance = relevance_loader()
+loader = data_loader.DataLoader()
+queries = query_loader.QueryLoader()
+relevance = relevance_loader.RelevanceLoader()
+
 table_data = loader.load_preprocessed_data()
 
 df = pd.DataFrame()

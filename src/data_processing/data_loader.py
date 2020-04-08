@@ -1,7 +1,6 @@
 import json
-import os
 
-class data_loader:
+class DataLoader:
     filePrefix = "re_tables-"
     suffix = ".json"
     start = 1
