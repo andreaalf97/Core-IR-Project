@@ -10,10 +10,13 @@ class dbPediaEntityLoader:
         self.sparql = SPARQLWrapper("http://dbpedia.org/sparql")
 
     def get_dbpedia_entities(self, entityString, limit=10, excludeCategories=False):
+        #SPARQL cannot handle apostrophes, quotes, and empty strings
         if len(entityString) < 1:
             return []
-        #SPARQL cannot handle apostrophes
         entityString = entityString.replace("'", "")
+        entityString = entityString.replace("\"", "")
+        entityString = entityString.replace("\n", " ")
+        entityString = entityString.strip()
         # This query gets the top 10 rdf:type values of an entity
         self.sparql.setReturnFormat(JSON)
         # Add 10 to the limit in case we want to filter stuff out later through Python
