@@ -64,7 +64,6 @@ class dbPediaEntityLoader:
         entitySubstring = entity.replace("http://dbpedia.org/resource/", "")
         if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/"]):
             return []
-        print(entity)
         entity = entity.strip()
         query = '''select distinct ?categories { dbr:''' + self.get_entity_string(entity) + ''' ?property ?categories
                     FILTER(fn:starts-with(STR(?property),"http://purl.org/dc/terms/subject"))
