@@ -60,13 +60,27 @@ class dbPediaEntityLoader:
 
     # Takes the returned url of the entity and gets related categories
     def get_dbPedia_categories(self, entity):
-        query = '''SELECT * WHERE { <''' + entity + '''> <http://purl.org/dc/terms/subject> ?categories .}'''
+        #SPARQL cannot handle apostrophes, quotes, and empty strings
+        if len(entity) < 1 or entity == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
+            return []
+        entitySubstring = entity.replace("http://dbpedia.org/resource/", "")
+        if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/"]):
+            return []
+        print(entity)
+        entity = entity.strip()
+        query = '''select distinct ?categories { dbr:''' + self.get_entity_string(entity) + ''' ?property ?categories
+                    FILTER(fn:starts-with(STR(?property),"http://purl.org/dc/terms/subject"))
+                } LIMIT 5'''
         self.sparql.setQuery(query)
 
         # Map results to a list of types
         categories = self.sparql.query().convert()
         types = map(lambda x: x['categories']['value'], categories['results']['bindings'])
         return list(types)
+
+    # Get the entity from within the resource string
+    def get_entity_string(self, resource):
+        return resource.replace("http://dbpedia.org/resource/", "")
 
     # Construct a resource string using an entity label.
     def get_resource_string(self, entityLabel):

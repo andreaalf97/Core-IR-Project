@@ -1,43 +1,42 @@
-from src.data_processing import relevance_loader
 from src.data_processing import data_loader
-from src.data_processing import query_loader
 import pandas as pd
+from src.data_processing import dbPedia_entity_loader
+from src.data_processing.relevance_loader import relevance_loader
 
 loader = data_loader.data_loader()
-queries = query_loader.query_loader()
-relevance = relevance_loader.relevance_loader()
-
+dbPediaLoader = dbPedia_entity_loader.dbPediaEntityLoader()
+relevance = relevance_loader()
 table_data = loader.load_preprocessed_data()
 
-print("Started Processing")
-count = 0
-for i in range(0, len(queries.data)):
-    df = pd.DataFrame()
-    queryNumber = i + 1
-    for j in range(0, len(relevance.data)):
-        if int(relevance.data[j][0]) is queryNumber:
-            tableID = relevance.data[j][1]
-            table = table_data[tableID]
-            categories = table["categories"]
-            categoryFrameColumns = []
-            rowValues = []
-            #Construct row
-            for k in range(0, len(categories)):
-                category = categories[k]
-                categoryFrameColumns.append(category)
-                rowValues.append(1)
-            categoryFrame = pd.DataFrame(data=[rowValues], columns=categoryFrameColumns, index=[tableID])
-            df = df.append(categoryFrame).fillna(0)
-            categories = None
-    # Add row for query?
-    '''
-    queryFrameColumns = []
-    rowValues = []
-    for j in range(0, len(queries.data[i][1])):
-        term = queries.data[i][1][j]
-        rowValues.append(1)
-        queryFrameColumns.append(term)
-    queryFrame = pd.DataFrame(data=[rowValues], columns=queryFrameColumns, index=["query " + str(i)])
-    df = df.append(queryFrame).fillna(0)
-    '''
-    df.to_csv("bag_of_categories/bag_of_categories_" + str(queryNumber) + ".csv")
+df = pd.DataFrame()
+
+def getCategoryVector(entities):
+    categories = []
+    for j in entities:
+        if "Category:" in j:
+            categories.append(j)
+        else:
+            category = dbPediaLoader.get_dbPedia_categories(j)
+            if len(category) > 0:
+                categories = categories + category
+    return categories
+
+#Get json data
+#Iterate through query table pairs
+for i in range(0, len(relevance.data)):
+    print(relevance.data[i][0])
+    tableId = relevance.data[i][1]
+    table = table_data[tableId]
+    vectorRepresentation = pd.DataFrame()
+    if 'pgTitle' in table:
+        entities = dbPediaLoader.get_entity_robust(table['pgTitle'], limit=3, excludeCategories=False)
+        categories = getCategoryVector(entities)
+    if 'secondTitle' in table:
+        entities = dbPediaLoader.get_entity_robust(table['secondTitle'], limit=3, excludeCategories=False)
+        categories = getCategoryVector(entities)
+    if 'data' in table:
+        entities = dbPediaLoader.get_core_column_entities(table['data'])
+        categories = getCategoryVector(entities)
+    if 'caption' in table:
+        entities = dbPediaLoader.get_entity_robust(table['caption'], limit=3, excludeCategories=False)
+        categories = getCategoryVector(entities)
