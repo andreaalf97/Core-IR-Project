@@ -11,7 +11,7 @@ class dbPediaEntityLoader:
 
     def get_dbpedia_entities(self, entityString, limit=10, excludeCategories=False):
         #SPARQL cannot handle apostrophes, quotes, and empty strings
-        if len(entityString) < 1:
+        if len(entityString) < 1 or entityString == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
             return []
         entityString = entityString.replace("'", "")
         entityString = entityString.replace("\"", "")
@@ -20,12 +20,18 @@ class dbPediaEntityLoader:
         # This query gets the top 10 rdf:type values of an entity
         self.sparql.setReturnFormat(JSON)
         # Add 10 to the limit in case we want to filter stuff out later through Python
-        query = '''SELECT DISTINCT ?s ( bif:search_excerpt ( bif:vector () , ?o ) ) WHERE {
-            ?s ?p ?o .
-            FILTER ( bif:contains ( ?o, '"''' + entityString + '''"' ) )
-            FILTER(fn:starts-with(STR(?s),"http://dbpedia.org/resource/")).
-        }
-        LIMIT ''' + str(limit + 10)
+        query = '''
+        select ?s1 as ?s where {
+          select distinct ?s1, (SUM(?sc) as ?sum), (sql:rnk_scale (<LONG::IRI_RANK> (?s1))) as ?rank where { 
+             quad map virtrdf:DefaultQuadMap { 
+              graph ?g { 
+                ?s1 ?s1textp ?o1 .
+                ?o1 bif:contains '"''' + entityString + '''"' option (score ?sc)  .
+                FILTER(fn:starts-with(STR(?s1),"http://dbpedia.org/resource/")).
+              }
+            }
+          } GROUP BY ?s1
+        } order by desc (?sum * 3e-1 + sql:rnk_scale (<LONG::IRI_RANK> (?s1))) limit ''' + str(limit)
         self.sparql.setQuery(query)
 
         # Map results to a list of types
@@ -70,7 +76,10 @@ class dbPediaEntityLoader:
     # If a query only consists of two terms, it tries to use one of the terms.
     # If a query has only one term and nothing comes up, you're out of luck.
     def get_entity_robust(self, entityString, limit=10, excludeCategories=False):
-        entities = self.get_dbpedia_entities(entityString, limit, excludeCategories)
+        return self.get_dbpedia_entities(entityString, limit, excludeCategories)
+
+"""
+       entities = self.get_dbpedia_entities(entityString, limit, excludeCategories)
         terms = entityString.split()
         if len(entities) > 0:
             return entities
@@ -82,3 +91,5 @@ class dbPediaEntityLoader:
                 secondTryString = terms[0]
                 entities = self.get_dbpedia_entities(secondTryString, limit, excludeCategories)
         return entities
+
+"""
