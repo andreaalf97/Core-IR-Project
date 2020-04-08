@@ -37,7 +37,9 @@ class dbPediaEntityLoader:
         return types
 
     def get_url_ids(self, cell):
-        return list(map(lambda match: match[0], re.findall(r'\[(\w*)\|(.*)\]', cell)))
+        matches = re.findall(r'\[(\w*)\|(.*)\]', cell)
+        resources = map(lambda match: self.get_resource_string(match[0]), matches)
+        return list(resources)
 
     def get_core_column_entities(self, table):
         if len(table) == 0:
@@ -62,7 +64,7 @@ class dbPediaEntityLoader:
 
     # Construct a resource string using an entity label.
     def get_resource_string(self, entityLabel):
-        return "<http://dbpedia.org/resource/" + entityLabel
+        return "http://dbpedia.org/resource/" + entityLabel
 
     # This is a method that tries again with the last terms in a string if a query does not return any entities.
     # If a query only consists of two terms, it tries to use one of the terms.
