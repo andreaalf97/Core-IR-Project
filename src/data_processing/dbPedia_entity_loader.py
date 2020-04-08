@@ -11,7 +11,7 @@ class dbPediaEntityLoader:
 
     def get_dbpedia_entities(self, entityString, limit=10, excludeCategories=False):
         #SPARQL cannot handle apostrophes, quotes, and empty strings
-        if len(entityString) < 1 or entityString == 'Other':  # Don't ask me why 'Other' doesn't work, I have no clue...
+        if len(entityString) < 1 or entityString == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
             return []
         entityString = entityString.replace("'", "")
         entityString = entityString.replace("\"", "")
