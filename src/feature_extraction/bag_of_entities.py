@@ -18,6 +18,8 @@ for i in range(0, len(relevance.data)):
     table = table_data[tableId]
     if 'pgTitle' in table:
         print(dbPediaLoader.get_entity_robust(table['pgTitle'], limit=10, excludeCategories=False))
+    if 'secondTitle' in table:
+        print(dbPediaLoader.get_entity_robust(table['secondTitle'], limit=10, excludeCategories=False))
     if 'data' in table:
         print(dbPediaLoader.get_core_column_entities(table['data']))
     if 'caption' in table:
