@@ -20,18 +20,16 @@ class dbPediaEntityLoader:
         # This query gets the top 10 rdf:type values of an entity
         self.sparql.setReturnFormat(JSON)
         # Add 10 to the limit in case we want to filter stuff out later through Python
-        query = '''
-        select ?s1 as ?s where {
-          select distinct ?s1, (SUM(?sc) as ?sum), (sql:rnk_scale (<LONG::IRI_RANK> (?s1))) as ?rank where { 
-             quad map virtrdf:DefaultQuadMap { 
-              graph ?g { 
-                ?s1 ?s1textp ?o1 .
-                ?o1 bif:contains '"''' + entityString + '''"' option (score ?sc)  .
-                FILTER(fn:starts-with(STR(?s1),"http://dbpedia.org/resource/")).
-              }
-            }
-          } GROUP BY ?s1
-        } order by desc (?sum * 3e-1 + sql:rnk_scale (<LONG::IRI_RANK> (?s1))) limit ''' + str(limit)
+        query = '''select ?s (sum(?sc) as ?sum)
+                    WHERE
+                      {
+                        ?s ?p ?o .
+                        ?o bif:contains ''' + "\'" + "\"" + entityString + "\"" + "\'" '''
+                        OPTION (score ?sc) 
+                      }
+                    GROUP BY ?s
+                    ORDER BY DESC (?sum)
+                    LIMIT ''' + str(limit)
         self.sparql.setQuery(query)
 
         # Map results to a list of types
