@@ -1,10 +1,11 @@
+from src.utils.similarity import fusion
 from src.utils.globalLoaders import getQueryList, getTableList
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import spacy
 import pandas as pd
-
+from numpy.linalg import norm
 
 def normalize_string(string, lemmatizer: WordNetLemmatizer, remove_stopwords=True, remove_duplicates=True) -> list:
     '''This function removes stopwords and lemmatizes the input string, then returns the normalized list'''
@@ -27,18 +28,21 @@ def normalize_string(string, lemmatizer: WordNetLemmatizer, remove_stopwords=Tru
     return string
 
 
-def word_embedding(words: list, nlp):
-    '''This functions receives a list of words and returns their vector representations based on a pre-loaded model'''
-    return [nlp(word) for word in words]
+def word_embedding_single_word(words: list, nlp):
+    '''This functions receives a list of words and returns their vector
+    representations (Token type) based on a pre-loaded model'''
+
+    return [nlp(word)[0] for word in words if word in nlp.vocab and norm(nlp(word)[0].vector) != 0]
 
 
-def getQueryByNumber(id: str, queries: list) -> str:
+def getQueryByNumber(id: int, queries: list) -> str:
     '''This function returns the query from its id'''
     for query in queries:
+        # print("#" + query[0] + "||" + str(id) + "#", query[0] == id)
         if query[0] == str(id):
             return " ".join(query[1])
 
-    raise Exception("The list of queries does not contain the give id:", id)
+    raise Exception("The list of queries does not contain the given id:", id, query[0])
 
 
 def getTableById(id: str, tables: list) -> str:
@@ -65,24 +69,70 @@ if __name__ == '__main__':
     with open("../resources/extracted_features/features.csv", "r") as file:
         df = pd.read_csv(file)
 
+    if "early" in df:
+        print("The features are already in the CSV file")
+        exit(-1)
+
     lastQueryNumber = -1  # We keep track of the last loaded query so we don't have to extract embeddings at every cycle
+
+    table_vectors_dict: dict = {}
+
+    earlyFusionResults = []
+    lateMaxResults = []
+    lateSumResults = []
+    lateAvgResults = []
     for index, row in df.iterrows():
 
         if row["queryNumber"] != lastQueryNumber:
             lastQueryNumber = row["queryNumber"]
             query: str = getQueryByNumber(row["queryNumber"], queries)  # Retrieve the query from the id as a string
-            query_vectors: list = word_embedding(  # Extract the word embeddings from the normalized sentence
+            query_vectors: list = word_embedding_single_word(  # Extract the word embeddings from the normalized sentence
                 normalize_string(query, lemmatizer),
                 nlp
             )
 
-        table: str = getTableById(row["tableId"], tables)
-        table_vectors: list = word_embedding(  # Extract the word embeddings from the normalized sentence
-            normalize_string(table, lemmatizer),
-            nlp
-        )
+        if row["tableId"] in table_vectors_dict:
+            table_vectors: list = table_vectors_dict[row["tableId"]]
+        else:
+            table: str = getTableById(row["tableId"], tables)
+            table_vectors: list = word_embedding_single_word(  # Extract the word embeddings from the normalized sentence
+                normalize_string(table, lemmatizer),
+                nlp
+            )
+            table_vectors_dict[row["tableId"]] = table_vectors
 
         print("QUERY:", query_vectors)
         print("TABLE no duplicates:", table_vectors)
 
-        break
+        fusion_dict: dict = fusion(table_vectors, query_vectors)
+
+        print("Early fusion: %.4f" % fusion_dict["early"])
+        earlyFusionResults.append("%.4f" % fusion_dict["early"])
+
+        print("Late-max fusion: %.4f" % fusion_dict["late-max"])
+        lateMaxResults.append("%.4f" % fusion_dict["late-max"])
+
+        print("Late-sum fusion: %.4f" % fusion_dict["late-sum"])
+        lateSumResults.append("%.4f" % fusion_dict["late-sum"])
+
+        print("Late-avg fusion: %.4f" % fusion_dict["late-avg"])
+        lateAvgResults.append("%.4f" % fusion_dict["late-avg"])
+
+        print("=====================")
+
+        # if index == 5:
+        #     print(earlyFusionResults)
+        #     print(lateMaxResults)
+        #     print(lateSumResults)
+        #     print(lateAvgResults)
+        #     exit(0)
+
+    df["early"] = earlyFusionResults
+    df["late-max"] = lateMaxResults
+    df["late-avg"] = lateAvgResults
+    df["late-sum"] = lateSumResults
+
+    with open("../resources/extracted_features/features.csv", "w") as file:
+        df.to_csv(file)
+
+    exit(0)

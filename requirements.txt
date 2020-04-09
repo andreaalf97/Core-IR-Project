@@ -1,7 +1,9 @@
-SPARQLWrapper
 spacy
 nltk
 qwikidata
 pandas
 requests
 certifi==2020.4.5.1
+
+numpy~=1.18.1
+sparqlwrapper~=1.8.5
