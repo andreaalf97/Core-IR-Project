@@ -75,14 +75,21 @@ if __name__ == '__main__':
 
     lastQueryNumber = -1  # We keep track of the last loaded query so we don't have to extract embeddings at every cycle
 
+    # This is used to keep track of the tables that have already been
+    # vectorized to reload them if necessary
     table_vectors_dict: dict = {}
 
+    # These are the lists of similarities to be added to the csv file
     earlyFusionResults = []
     lateMaxResults = []
     lateSumResults = []
     lateAvgResults = []
+
+    # For each row in the CSV file, I have the table-query pairs
     for index, row in df.iterrows():
 
+        # I save the last vectorization of the query to just reload it if necessary
+        # This is because the same query compares in multiple adjacent rows in the file
         if row["queryNumber"] != lastQueryNumber:
             lastQueryNumber = row["queryNumber"]
             query: str = getQueryByNumber(row["queryNumber"], queries)  # Retrieve the query from the id as a string
@@ -91,10 +98,11 @@ if __name__ == '__main__':
                 nlp
             )
 
+        # If the table has already been processed, I just load the vectors from memory
         if row["tableId"] in table_vectors_dict:
             table_vectors: list = table_vectors_dict[row["tableId"]]
         else:
-            table: str = getTableById(row["tableId"], tables)
+            table: str = getTableById(row["tableId"], tables)  # I retrieve the table as a long string of words
             table_vectors: list = word_embedding_single_word(  # Extract the word embeddings from the normalized sentence
                 normalize_string(table, lemmatizer),
                 nlp
@@ -104,6 +112,8 @@ if __name__ == '__main__':
         print("QUERY:", query_vectors)
         print("TABLE no duplicates:", table_vectors)
 
+        # This function compare the vectors in the table and in the query with
+        # different similarity measure, returned in this dictionary
         fusion_dict: dict = fusion(table_vectors, query_vectors)
 
         print("Early fusion: %.4f" % fusion_dict["early"])
@@ -120,13 +130,7 @@ if __name__ == '__main__':
 
         print("=====================")
 
-        # if index == 5:
-        #     print(earlyFusionResults)
-        #     print(lateMaxResults)
-        #     print(lateSumResults)
-        #     print(lateAvgResults)
-        #     exit(0)
-
+    # Finally, we add the results to the csv file and save it
     df["early"] = earlyFusionResults
     df["late-max"] = lateMaxResults
     df["late-avg"] = lateAvgResults
