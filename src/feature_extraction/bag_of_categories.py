@@ -107,7 +107,6 @@ for i in range(0, len(relevance.data)):
         'csum': late_sum,
         'cavg': late_avg
     })
-    similarity_measures.to_csv("category_features.csv")
 
     #Reset dataframe once bags are generated
     del df
