@@ -69,7 +69,8 @@ for i in range(0, len(relevance.data)):
         print(datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
         queryTerms = bagUtils.getQueryTerms(currentQuery)
         for j in range(0, len(queryTerms)):
-            entities = dbPediaLoader.get_entity_robust(queryTerms[j], limit=4, excludeCategories=False, onlyDbpedia=True)
+            #Use a higher limit to ensure that you get as many entities as possible for matching.
+            entities = dbPediaLoader.get_entity_robust(queryTerms[j], limit=8, excludeCategories=False, onlyDbpedia=True)
             categories = getCategoryVector(entities)
             queryDf = bagUtils.addCategoryVectorToBag(categories, queryDf, "query" + str(currentQuery) + "_" + queryTerms[j])
     if 'pgTitle' in table:
@@ -100,16 +101,15 @@ for i in range(0, len(relevance.data)):
     late_max.append("%.4f" % sim["late-max"])
     late_sum.append("%.4f" % sim["late-sum"])
     late_avg.append("%.4f" % sim["late-avg"])
-    print(sim)
-    similarity_measures = pd.DataFrame({
-        'cearly': early,
-        'cmax': late_max,
-        'csum': late_sum,
-        'cavg': late_avg
-    })
 
     #Reset dataframe once bags are generated
     del df
     df = pd.DataFrame()
 
+similarity_measures = pd.DataFrame({
+    'cearly': early,
+    'cmax': late_max,
+    'csum': late_sum,
+    'cavg': late_avg
+})
 similarity_measures.to_csv("category_features.csv")
