@@ -4,6 +4,9 @@ from numpy import ndarray
 
 
 def cosine_similarity(vect1: ndarray, vect2: ndarray) -> float:
+    if norm(vect1) == 0 or norm(vect2) == 0:
+        return 0.0
+
     div = norm(vect1) * norm(vect2)
 
     if div == 0:

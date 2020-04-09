@@ -35,9 +35,9 @@ def compute_similarity_metrics(frame):
     for row in frame.itertuples(index=True):
         index = row[0]
         if index.startswith("table-"):
-            table_vectors.append(np.asarray(row[1:]))
+            table_vectors.append(np.array(row[1:]))
         else:
-            query_vectors.append(np.asarray(row[1:]))
+            query_vectors.append(np.array(row[1:]))
     fusion_dict: dict = similarity.fusion(table_terms=list(table_vectors),
                                           query_terms=list(query_vectors),
                                           vector_size=len(query_vectors[0]))
@@ -49,6 +49,11 @@ currentQuery = 0
 df = pd.DataFrame()
 queryDf = pd.DataFrame()
 ts = time.time()
+
+early = []
+late_max = []
+late_sum = []
+late_avg = []
 print(datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
 for i in range(0, len(relevance.data)):
     tableId = relevance.data[i][1]
@@ -90,8 +95,22 @@ for i in range(0, len(relevance.data)):
     # Place query and tables bag of words in same dataframe to ensure that we can get equalized vector lengths
     df = pd.concat([df, queryDf], axis=0, ignore_index=False).fillna(0)
     # Query/Table pair comparisons and similarity scores.
+    sim = compute_similarity_metrics(df)
+    early.append("%.4f" % sim["early"])
+    late_max.append("%.4f" % sim["late-max"])
+    late_sum.append("%.4f" % sim["late-sum"])
+    late_avg.append("%.4f" % sim["late-avg"])
+    print(sim)
+    similarity_measures = pd.DataFrame({
+        'cearly': early,
+        'cmax': late_max,
+        'csum': late_sum,
+        'cavg': late_avg
+    })
+    similarity_measures.to_csv("category_features.csv")
 
-    compute_similarity_metrics(df)
     #Reset dataframe once bags are generated
     del df
     df = pd.DataFrame()
+
+similarity_measures.to_csv("category_features.csv")

@@ -32,7 +32,7 @@ def word_embedding_single_word(words: list, nlp):
     '''This functions receives a list of words and returns their vector
     representations (Token type) based on a pre-loaded model'''
 
-    return [nlp(word)[0] for word in words if word in nlp.vocab and norm(nlp(word)[0].vector) != 0]
+    return [nlp(word)[0] for word in words if word in nlp.vocab]
 
 
 def getQueryByNumber(id: int, queries: list) -> str:
