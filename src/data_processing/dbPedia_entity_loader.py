@@ -9,7 +9,7 @@ class dbPediaEntityLoader:
         self.S = requests.Session()
         self.sparql = SPARQLWrapper("http://dbpedia.org/sparql")
 
-    def get_dbpedia_entities(self, entityString, limit=10, excludeCategories=False):
+    def get_dbpedia_entities(self, entityString, limit=10, excludeCategories=False, onlyDbpedia=False):
         #SPARQL cannot handle apostrophes, quotes, and empty strings
         if len(entityString) < 1 or entityString == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
             return []
@@ -37,6 +37,8 @@ class dbPediaEntityLoader:
         types = list(map(lambda x: x['s']['value'], entity['results']['bindings']))
         if excludeCategories is True:
             types = [x for x in types if "http://dbpedia.org/resource/Category:" not in x]
+        if onlyDbpedia is True:
+            types = [x for x in types if "http://dbpedia.org/resource/" in x]
         types = types[:limit]
         return types
 
@@ -62,7 +64,7 @@ class dbPediaEntityLoader:
         if len(entity) < 1 or entity == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
             return []
         entitySubstring = entity.replace("http://dbpedia.org/resource/", "")
-        if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/"]):
+        if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/", "!"]):
             return []
         entity = entity.strip()
         query = '''select distinct ?categories { dbr:''' + self.get_entity_string(entity) + ''' ?property ?categories
@@ -86,8 +88,8 @@ class dbPediaEntityLoader:
     # This is a method that tries again with the last terms in a string if a query does not return any entities.
     # If a query only consists of two terms, it tries to use one of the terms.
     # If a query has only one term and nothing comes up, you're out of luck.
-    def get_entity_robust(self, entityString, limit=10, excludeCategories=False):
-        return self.get_dbpedia_entities(entityString, limit, excludeCategories)
+    def get_entity_robust(self, entityString, limit=10, excludeCategories=False, onlyDbpedia=False):
+        return self.get_dbpedia_entities(entityString, limit, excludeCategories, onlyDbpedia)
 
 """
        entities = self.get_dbpedia_entities(entityString, limit, excludeCategories)
