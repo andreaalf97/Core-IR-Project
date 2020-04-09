@@ -16,8 +16,9 @@ class QueryLoader:
         # Split into elements by \n
         unparsed_data = str.splitlines(f.read())
         for line in unparsed_data:
-            query_number = line[0]  # The first char is always the query number
-            words  = word_tokenize(line[1:].lower())  # We return the lemmatized version of the query
+            query_number = line.split(" ")[0]  # The first char is always the query number
+            query = " ".join(line.split(" ")[1:])
+            words = word_tokenize(query.lower())  # We return the lemmatized version of the query
 
             row = [query_number, words]
             self.data.append(row)
