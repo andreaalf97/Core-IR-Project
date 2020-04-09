@@ -9,7 +9,7 @@ class dbPediaEntityLoader:
         self.S = requests.Session()
         self.sparql = SPARQLWrapper("http://dbpedia.org/sparql")
 
-    def get_dbpedia_entities(self, entityString, limit=10, excludeCategories=False):
+    def get_dbpedia_entities(self, entityString, limit=10, excludeCategories=False, onlyDbpedia=False):
         #SPARQL cannot handle apostrophes, quotes, and empty strings
         if len(entityString) < 1 or entityString == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
             return []
@@ -20,18 +20,16 @@ class dbPediaEntityLoader:
         # This query gets the top 10 rdf:type values of an entity
         self.sparql.setReturnFormat(JSON)
         # Add 10 to the limit in case we want to filter stuff out later through Python
-        query = '''
-        select ?s1 as ?s where {
-          select distinct ?s1, (SUM(?sc) as ?sum), (sql:rnk_scale (<LONG::IRI_RANK> (?s1))) as ?rank where { 
-             quad map virtrdf:DefaultQuadMap { 
-              graph ?g { 
-                ?s1 ?s1textp ?o1 .
-                ?o1 bif:contains '"''' + entityString + '''"' option (score ?sc)  .
-                FILTER(fn:starts-with(STR(?s1),"http://dbpedia.org/resource/")).
-              }
-            }
-          } GROUP BY ?s1
-        } order by desc (?sum * 3e-1 + sql:rnk_scale (<LONG::IRI_RANK> (?s1))) limit ''' + str(limit)
+        query = '''select ?s (sum(?sc) as ?sum)
+                    WHERE
+                      {
+                        ?s ?p ?o .
+                        ?o bif:contains ''' + "\'" + "\"" + entityString + "\"" + "\'" '''
+                        OPTION (score ?sc) 
+                      }
+                    GROUP BY ?s
+                    ORDER BY DESC (?sum)
+                    LIMIT ''' + str(limit)
         self.sparql.setQuery(query)
 
         # Map results to a list of types
@@ -39,6 +37,8 @@ class dbPediaEntityLoader:
         types = list(map(lambda x: x['s']['value'], entity['results']['bindings']))
         if excludeCategories is True:
             types = [x for x in types if "http://dbpedia.org/resource/Category:" not in x]
+        if onlyDbpedia is True:
+            types = [x for x in types if "http://dbpedia.org/resource/" in x]
         types = types[:limit]
         return types
 
@@ -60,13 +60,26 @@ class dbPediaEntityLoader:
 
     # Takes the returned url of the entity and gets related categories
     def get_dbPedia_categories(self, entity):
-        query = '''SELECT * WHERE { <''' + entity + '''> <http://purl.org/dc/terms/subject> ?categories .}'''
+        #SPARQL cannot handle apostrophes, quotes, and empty strings
+        if len(entity) < 1 or entity == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
+            return []
+        entitySubstring = entity.replace("http://dbpedia.org/resource/", "")
+        if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/", "!"]):
+            return []
+        entity = entity.strip()
+        query = '''select distinct ?categories { dbr:''' + self.get_entity_string(entity) + ''' ?property ?categories
+                    FILTER(fn:starts-with(STR(?property),"http://purl.org/dc/terms/subject"))
+                } LIMIT 5'''
         self.sparql.setQuery(query)
 
         # Map results to a list of types
         categories = self.sparql.query().convert()
         types = map(lambda x: x['categories']['value'], categories['results']['bindings'])
         return list(types)
+
+    # Get the entity from within the resource string
+    def get_entity_string(self, resource):
+        return resource.replace("http://dbpedia.org/resource/", "")
 
     # Construct a resource string using an entity label.
     def get_resource_string(self, entityLabel):
@@ -75,8 +88,8 @@ class dbPediaEntityLoader:
     # This is a method that tries again with the last terms in a string if a query does not return any entities.
     # If a query only consists of two terms, it tries to use one of the terms.
     # If a query has only one term and nothing comes up, you're out of luck.
-    def get_entity_robust(self, entityString, limit=10, excludeCategories=False):
-        return self.get_dbpedia_entities(entityString, limit, excludeCategories)
+    def get_entity_robust(self, entityString, limit=10, excludeCategories=False, onlyDbpedia=False):
+        return self.get_dbpedia_entities(entityString, limit, excludeCategories, onlyDbpedia)
 
 """
        entities = self.get_dbpedia_entities(entityString, limit, excludeCategories)
