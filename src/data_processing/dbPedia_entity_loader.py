@@ -77,9 +77,7 @@ class dbPediaEntityLoader:
         if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/", "!", "#", "*", "+"]):
             return []
         entity = entity.strip()
-        query = '''select distinct ?categories { dbr:''' + self.get_entity_string(entity) + ''' ?property ?categories
-                    FILTER(fn:starts-with(STR(?property),"http://purl.org/dc/terms/subject"))
-                } LIMIT 20'''
+        query = '''select distinct ?categories { dbr:''' + self.get_entity_string(entity) + ''' dct:subject ?categories } LIMIT 20'''
         self.sparql.setQuery(query)
 
         # Map results to a list of types
