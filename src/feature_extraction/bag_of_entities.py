@@ -27,6 +27,7 @@ late_avg = []
 
 def get_related_entities_vector(entities):
     related = []
+    related.extend(entities)
     for j in entities:
         if "Category:" not in j:
             relatedEntity = dbPediaLoader.get_dbPedia_related_entities(j)
