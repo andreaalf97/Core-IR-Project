@@ -86,9 +86,9 @@ for i in range(0, len(relevance.data)):
     df = pd.DataFrame()
 
 similarity_measures = pd.DataFrame({
-    'cearly': early,
-    'cmax': late_max,
-    'csum': late_sum,
-    'cavg': late_avg
+    'eearly': early,
+    'emax': late_max,
+    'esum': late_sum,
+    'eavg': late_avg
 })
 similarity_measures.to_csv("entity_features.csv")
