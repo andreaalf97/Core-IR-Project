@@ -33,6 +33,19 @@ def addCategoryVectorToBag(vector, bag, index):
     else:
         return bag
 
+# Add bag of something row to the bag
+def addResourceVectorToBag(vector, bag, index):
+    prefix = "http://dbpedia.org/resource/"
+    vector = remove_duplicates_from_list(remove_prefix(vector, prefix))
+    if len(vector) > 0:
+        row = [1] * len(vector)
+        rowFrame = pd.DataFrame(data=[row], columns=vector, index=[index])
+        bag = bag.append(rowFrame).fillna(0)
+        del rowFrame
+        return bag
+    else:
+        return bag
+
 # Returns the search terms used for getting entities for a query
 def getQueryTerms(queryNumber):
     query = queryLoader.data[queryNumber - 1][1]
