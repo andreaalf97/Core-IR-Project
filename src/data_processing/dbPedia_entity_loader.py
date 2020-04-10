@@ -85,6 +85,24 @@ class dbPediaEntityLoader:
         types = map(lambda x: x['categories']['value'], categories['results']['bindings'])
         return list(types)
 
+    # Takes the returned url of the entity and gets related entities
+    def get_dbPedia_related_entities(self, entity):
+        #SPARQL cannot handle apostrophes, quotes, and empty strings
+        if len(entity) < 1 or entity == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
+            return []
+        entitySubstring = entity.replace("http://dbpedia.org/resource/", "")
+        if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/", "!", "#", "*", "+"]):
+            return []
+        entity = entity.strip()
+        query = '''select distinct ?related { dbr:''' + self.get_entity_string(entity) + ''' rdf:type ?related
+                } LIMIT 20'''
+        self.sparql.setQuery(query)
+
+        # Map results to a list of types
+        categories = self.sparql.query().convert()
+        types = map(lambda x: x['related']['value'], categories['results']['bindings'])
+        return list(types)
+
     # Get the entity from within the resource string
     def get_entity_string(self, resource):
         return resource.replace("http://dbpedia.org/resource/", "")
