@@ -8,9 +8,6 @@ from src.utils import bagUtils
 import datetime
 import time
 
-from src.utils import similarity
-import numpy as np
-
 loader = data_loader.DataLoader()
 relevance = RelevanceLoader()
 dbPediaLoader = dbPedia_entity_loader.dbPediaEntityLoader()
@@ -28,20 +25,6 @@ def getCategoryVector(entities):
             if len(category) > 0:
                 categories = categories + category
     return categories
-
-def compute_similarity_metrics(frame):
-    query_vectors = []
-    table_vectors = []
-    for row in frame.itertuples(index=True):
-        index = row[0]
-        if index.startswith("table-"):
-            table_vectors.append(np.array(row[1:]))
-        else:
-            query_vectors.append(np.array(row[1:]))
-    fusion_dict: dict = similarity.fusion(table_terms=list(table_vectors),
-                                          query_terms=list(query_vectors),
-                                          vector_size=len(query_vectors[0]))
-    return fusion_dict
 
 currentQuery = 0
 #Get json data
@@ -96,7 +79,7 @@ for i in range(0, len(relevance.data)):
     # Place query and tables bag of words in same dataframe to ensure that we can get equalized vector lengths
     df = pd.concat([df, queryDf], axis=0, ignore_index=False).fillna(0)
     # Query/Table pair comparisons and similarity scores.
-    sim = compute_similarity_metrics(df)
+    sim = bagUtils.compute_similarity_metrics(df)
     early.append("%.4f" % sim["early"])
     late_max.append("%.4f" % sim["late-max"])
     late_sum.append("%.4f" % sim["late-sum"])

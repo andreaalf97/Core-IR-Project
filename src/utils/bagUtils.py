@@ -5,6 +5,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 from src.data_processing.query_loader import QueryLoader
+from src.utils import similarity
+import numpy as np
 
 nltk.download('stopwords')
 queryLoader = QueryLoader()
@@ -47,3 +49,17 @@ def getQueryTerms(queryNumber):
             if len(tokens_without_sw) > 0 and len(combinationString) > 2:
                 queryTerms.append(combinationString)
     return queryTerms
+
+def compute_similarity_metrics(frame):
+    query_vectors = []
+    table_vectors = []
+    for row in frame.itertuples(index=True):
+        index = row[0]
+        if index.startswith("table-"):
+            table_vectors.append(np.array(row[1:]))
+        else:
+            query_vectors.append(np.array(row[1:]))
+    fusion_dict: dict = similarity.fusion(table_terms=list(table_vectors),
+                                          query_terms=list(query_vectors),
+                                          vector_size=len(query_vectors[0]))
+    return fusion_dict
