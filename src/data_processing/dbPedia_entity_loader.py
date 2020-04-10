@@ -58,18 +58,26 @@ class dbPediaEntityLoader:
                     column_entities[j].extend(cell_entities)  # Append entities to current column
         return max(column_entities, key=len)  # Return core column with most entities
 
+    def get_core_title_entities(self, titles):
+        if len(titles) == 0:
+            return []
+        column_entities = [[] for x in range(len(titles))]
+        for i in range(0, len(titles)):
+            title_entities = self.get_url_ids(titles[i])  # Get entities of a cell
+            if title_entities:
+                column_entities[i].extend(title_entities)  # Append entities to current column
+        return max(column_entities, key=len)  # Return core column with most entities
+
     # Takes the returned url of the entity and gets related categories
     def get_dbPedia_categories(self, entity):
         #SPARQL cannot handle apostrophes, quotes, and empty strings
         if len(entity) < 1 or entity == 'Other':  # Don't ask me why 'Other' times out, I have no clue...
             return []
         entitySubstring = entity.replace("http://dbpedia.org/resource/", "")
-        if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/", "!"]):
+        if any(x in entitySubstring for x in ["'", ",", "\"", "\n", "(", ")", "&", ".", "$", "/", "!", "#", "*", "+"]):
             return []
         entity = entity.strip()
-        query = '''select distinct ?categories { dbr:''' + self.get_entity_string(entity) + ''' ?property ?categories
-                    FILTER(fn:starts-with(STR(?property),"http://purl.org/dc/terms/subject"))
-                } LIMIT 5'''
+        query = '''select distinct ?categories { dbr:''' + self.get_entity_string(entity) + ''' dct:subject ?categories } LIMIT 20'''
         self.sparql.setQuery(query)
 
         # Map results to a list of types
@@ -90,9 +98,8 @@ class dbPediaEntityLoader:
     # If a query has only one term and nothing comes up, you're out of luck.
     def get_entity_robust(self, entityString, limit=10, excludeCategories=False, onlyDbpedia=False):
         return self.get_dbpedia_entities(entityString, limit, excludeCategories, onlyDbpedia)
-
-"""
-       entities = self.get_dbpedia_entities(entityString, limit, excludeCategories)
+'''
+        entities = self.get_dbpedia_entities(entityString, limit, excludeCategories)
         terms = entityString.split()
         if len(entities) > 0:
             return entities
@@ -104,5 +111,4 @@ class dbPediaEntityLoader:
                 secondTryString = terms[0]
                 entities = self.get_dbpedia_entities(secondTryString, limit, excludeCategories)
         return entities
-
-"""
+'''

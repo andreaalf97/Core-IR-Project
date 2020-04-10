@@ -29,6 +29,13 @@ def fusion(table_terms: list, query_terms: list, vector_size=300) -> dict:
     This function returns the similarity of the two lists using different measures
     Returns a dictionary with keys ["early", "late-max", "late-sum", "late-avg"]
     '''
+    if len(table_terms) == 0 or len(query_terms) == 0:
+        return {
+            "early": 0.0,
+            "late-max": 0.0,
+            "late-sum": 0.0,
+            "late-avg": 0.0
+        }
 
     if type(table_terms[0]) == Token:
         table_terms = [term.vector for term in table_terms]
@@ -36,9 +43,9 @@ def fusion(table_terms: list, query_terms: list, vector_size=300) -> dict:
     if type(query_terms[0]) == Token:
         query_terms = [term.vector for term in query_terms]
 
-    if type(table_terms[0] != ndarray):
+    if type(table_terms[0]) != ndarray:
         raise Exception("table_terms should be of type ndarray")
-    if type(query_terms[0] != ndarray):
+    if type(query_terms[0]) != ndarray:
         raise Exception("query_terms should be of type ndarray")
 
     similarities: dict = {
