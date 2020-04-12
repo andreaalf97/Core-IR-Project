@@ -1,5 +1,10 @@
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 import pandas as pd
+from sklearn.metrics import ndcg_score
+from sklearn.model_selection import cross_val_score, cross_validate
+from sklearn.naive_bayes import GaussianNB
+from sklearn import svm
+import numpy as np
 
 
 class Model:
@@ -15,8 +20,11 @@ class Model:
         self.features = self.features.drop(["relevance", "tableId", "queryContents"], axis=1)
 
     def train(self):
-        self.clf = RandomForestClassifier(max_depth=5, random_state=0)
+        self.clf = RandomForestRegressor(max_depth=5, min_samples_split=3, random_state=0, oob_score=True)
+        results = cross_validate(self.clf, self.features, self.labels, cv=5, verbose=1,
+                           scoring=['explained_variance', 'max_error', "neg_mean_squared_error"], n_jobs=-1)
         self.clf.fit(self.features, self.labels)
+        return results
 
     def predict(self, item):
         cls =self.clf.predict(item)
@@ -32,4 +40,18 @@ class Model:
                 cls = self.predict(table)
                 rankings.append([tableId, cls[0]])
         #Sort the rankings by relevance before returning it.
+        rankings.sort(key=self.comparator, reverse=True)
         return rankings
+
+    def comparator(self, item):
+        return item[1]
+
+    def ndcg_scoring(self, rankings, queryNumber):
+        #Get true scores
+        trueScores = []
+        targetScores = []
+        for i in range(0, len(rankings)):
+            data = self.data.loc[(self.data['tableId'] == rankings[i][0]) & (self.data['queryNumber'] == queryNumber)]
+            trueScores.append(rankings[i][1])
+            targetScores.append(int(data["relevance"].iat[0]))
+        return ndcg_score(y_true=np.asarray([trueScores]), y_score=np.asarray([targetScores]))
