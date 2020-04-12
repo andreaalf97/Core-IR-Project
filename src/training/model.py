@@ -1,9 +1,6 @@
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import ndcg_score
-from sklearn.model_selection import cross_val_score, cross_validate
-from sklearn.naive_bayes import GaussianNB
-from sklearn import svm
+from sklearn.model_selection import cross_validate
 import numpy as np
 
 
