@@ -43,7 +43,10 @@ class Model:
     def comparator(self, item):
         return item[1]
 
-    def ndcg_scoring(self, rankings, queryNumber):
+    # Rankings is the list of scores for the tables being evaluated for a query.
+    # Query number is the query being evaluated
+    # K is the number of scores to take into account in the NDCG scoring. E.g., k=20 just looks at top 20 in the ranking.
+    def ndcg_scoring(self, rankings, queryNumber, k=20):
         #Get true scores
         trueScores = []
         targetScores = []

@@ -7,7 +7,7 @@ model = Model(data=df)
 model.extractFeaturesAndLabels()
 scores = model.train()
 print(scores)
-for i in range(1, 60):
+for i in range(1, 61):
     print(i)
     ranking = model.getRankingForQuery(i)
     print(ranking)
