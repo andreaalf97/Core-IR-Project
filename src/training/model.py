@@ -16,7 +16,6 @@ class Model:
         self.features = self.data
         #Remove labels from features. We also remove any strings because they can't be converted to floats.
         self.features = self.features.drop(["Unnamed: 0", "relevance", "tableId", "queryContents", "queryNumber"], axis=1)
-        print(self.features)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.features, self.labels,
                                                                                 test_size=0.2, random_state=0,
                                                                                 stratify=self.labels)
