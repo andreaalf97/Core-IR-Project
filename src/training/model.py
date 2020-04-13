@@ -1,7 +1,8 @@
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.metrics import ndcg_score, f1_score, explained_variance_score, max_error, mean_squared_error
 from sklearn.model_selection import cross_validate, train_test_split
 import numpy as np
+import pandas as pd
 
 
 class Model:
@@ -14,8 +15,8 @@ class Model:
         self.labels = self.data["relevance"]
         self.features = self.data
         #Remove labels from features. We also remove any strings because they can't be converted to floats.
-        #TODO: Maybe we should remove the query number as well?
-        self.features = self.features.drop(["relevance", "tableId", "queryContents"], axis=1)
+        self.features = self.features.drop(["Unnamed: 0", "relevance", "tableId", "queryContents", "queryNumber"], axis=1)
+        print(self.features)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.features, self.labels,
                                                                                 test_size=0.2, random_state=0,
                                                                                 stratify=self.labels)
@@ -64,3 +65,17 @@ class Model:
             trueScores.append(rankings[i][1])
             targetScores.append(int(data["relevance"].iat[0]))
         return ndcg_score(y_true=np.asarray([trueScores]), y_score=np.asarray([targetScores]), k=k)
+
+    def gini_feature_selection(self, path="../resources/results/giniSelection.csv"):
+        classifier = RandomForestClassifier(max_depth=5, min_samples_split=3, random_state=0, oob_score=True)
+        classifier.fit(self.X_train, self.y_train)
+
+        gini_scores = zip(self.features, classifier.feature_importances_)
+        gini_scores = sorted(list(gini_scores), key = lambda x: x[1], reverse=True)
+
+        df = pd.DataFrame()
+        df["feature"] = [element[0] for element in gini_scores]
+        df["gini_score"] = [element[1] for element in gini_scores]
+
+        with open(path, "w") as file:
+            df.to_csv(file)
