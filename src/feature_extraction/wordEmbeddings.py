@@ -1,11 +1,12 @@
 from src.utils.similarity import fusion
 from src.utils.globalLoaders import getQueryList, getTableList
+import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import spacy
 import pandas as pd
-from numpy.linalg import norm
+from gensim.models import KeyedVectors
 
 def normalize_string(string, lemmatizer: WordNetLemmatizer, remove_stopwords=True, remove_duplicates=True) -> list:
     '''This function removes stopwords and lemmatizes the input string, then returns the normalized list'''
@@ -31,8 +32,7 @@ def normalize_string(string, lemmatizer: WordNetLemmatizer, remove_stopwords=Tru
 def word_embedding_single_word(words: list, nlp):
     '''This functions receives a list of words and returns their vector
     representations (Token type) based on a pre-loaded model'''
-
-    return [nlp(word)[0] for word in words if word in nlp.vocab]
+    return [nlp[word] for word in words if word in nlp.vocab]
 
 
 def getQueryByNumber(id: int, queries: list) -> str:
@@ -55,12 +55,16 @@ def getTableById(id: str, tables: list) -> str:
 
 
 if __name__ == '__main__':
+
+    nltk.download('punkt')
+    nltk.download('stopwords')
+    nltk.download('wordnet')
     lemmatizer = WordNetLemmatizer()  # The model used to lemmatize the words
 
     print("Loading w2v dataset...")
     # Loads the word embeddings model
     # en_core_web_lg is the largest word embeddings core model from spacy
-    nlp = spacy.load('en_core_web_lg')
+    nlp = KeyedVectors.load_word2vec_format("../resources/datasets/GoogleNews-vectors-negative300.bin", binary=True)
     print("Finished loading")
 
     tables = getTableList()  # The list of all tables
@@ -69,7 +73,7 @@ if __name__ == '__main__':
     with open("../resources/extracted_features/features.csv", "r") as file:
         df = pd.read_csv(file)
 
-    if "early" in df:
+    if "google_early" in df:
         print("The features are already in the CSV file")
         exit(-1)
 
@@ -109,8 +113,8 @@ if __name__ == '__main__':
             )
             table_vectors_dict[row["tableId"]] = table_vectors
 
-        print("QUERY:", query_vectors)
-        print("TABLE no duplicates:", table_vectors)
+        print("QUERY:", query)
+        # print("TABLE no duplicates:", table_vectors)
 
         # This function compare the vectors in the table and in the query with
         # different similarity measure, returned in this dictionary
@@ -131,10 +135,10 @@ if __name__ == '__main__':
         print("=====================")
 
     # Finally, we add the results to the csv file and save it
-    df["early"] = earlyFusionResults
-    df["late-max"] = lateMaxResults
-    df["late-avg"] = lateAvgResults
-    df["late-sum"] = lateSumResults
+    df["google_early"] = earlyFusionResults
+    df["google_late_max"] = lateMaxResults
+    df["google_late_avg"] = lateAvgResults
+    df["google_late_sum"] = lateSumResults
 
     with open("../resources/extracted_features/features.csv", "w") as file:
         df.to_csv(file)
