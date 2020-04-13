@@ -64,7 +64,7 @@ if __name__ == '__main__':
     print("Loading w2v dataset...")
     # Loads the word embeddings model
     # en_core_web_lg is the largest word embeddings core model from spacy
-    nlp = KeyedVectors.load_word2vec_format("C:\\Users\\andre\\Desktop\\misc\\w2v\\GoogleNews-vectors-negative300.bin", binary=True)
+    nlp = KeyedVectors.load_word2vec_format("../resources/datasets/GoogleNews-vectors-negative300.bin", binary=True)
     print("Finished loading")
 
     tables = getTableList()  # The list of all tables
