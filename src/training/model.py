@@ -12,7 +12,7 @@ class Model:
                     "sectionTitle_idf", "tableCaption_idf", "tableHeading_idf",
                     "tableBody_idf", "all_idf"]
 
-    def __init__(self, data=[], featuresToAddToBase=[], featureToRemoveFromTotal=[], useBaseFeatures=False):
+    def __init__(self, data=[], featuresToAddToBase=[], featureToRemoveFromTotal="", useBaseFeatures=False):
         self.data = data
         self.featuresToAddToBase = featuresToAddToBase
         self.featureToRemoveFromTotal = featureToRemoveFromTotal
@@ -28,7 +28,7 @@ class Model:
                 self.features = self.data[self.baseFeatures + self.featuresToAddToBase]
             else:
                 self.features = self.data[self.baseFeatures]
-        elif len(self.featureToRemoveFromTotal):
+        elif len(self.featureToRemoveFromTotal) > 0 :
             self.features = self.data
             self.features = self.features.drop(self.baseDroppedFeatures, axis=1)
             self.features = self.features.drop([self.featureToRemoveFromTotal], axis=1)
@@ -68,8 +68,9 @@ class Model:
                 self.rankingData = self.data[self.baseFeatures + self.featuresToAddToBase + self.baseDroppedFeatures]
             else:
                 self.rankingData = self.data[self.baseFeatures + self.baseDroppedFeatures]
-        elif len(self.featureToRemoveFromTotal):
+        elif len(self.featureToRemoveFromTotal) > 0:
             self.rankingData = self.data
+            self.rankingData = self.rankingData.drop([self.featureToRemoveFromTotal], axis=1)
         else:
             self.rankingData = self.data
         for index, row in self.rankingData.iterrows():

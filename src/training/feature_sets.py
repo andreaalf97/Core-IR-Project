@@ -15,19 +15,19 @@ featureSets = [
 labels = ["Word Embeddings", "Categories", "Google", "Entities"]
 
 print("Just The Base")
-base_score = train_model.train(df=df, useBaseFeatures=True)
+base_score, _, _ = train_model.train(df=df, useBaseFeatures=True)
 print(base_score)
 
 for i in range(0, len(featureSets)):
     print(labels[i])
     #Check individual features
     for j in range(0, len(featureSets[i])):
-        avg_score = train_model.train(df=df, featuresToAddToBase=[featureSets[i][j]], useBaseFeatures=True)
+        avg_score, _, _ = train_model.train(df=df, featuresToAddToBase=[featureSets[i][j]], useBaseFeatures=True)
         print(featureSets[i][j])
         print(avg_score)
         print(avg_score-base_score)
     #Check all features in list
     print("All")
-    avg_score = train_model.train(df=df, featuresToAddToBase=featureSets[i], useBaseFeatures=True)
+    avg_score, _, _ = train_model.train(df=df, featuresToAddToBase=featureSets[i], useBaseFeatures=True)
     print(avg_score)
     print(avg_score-base_score)

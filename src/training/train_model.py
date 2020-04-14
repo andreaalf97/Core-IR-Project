@@ -19,7 +19,7 @@ def train(df: pd.DataFrame, featureToRemoveFromTotal=[], featuresToAddToBase=[],
         #print(ndgc_score)
         all_scores.append(ndgc_score)
 
-    return sum(all_scores) / len(all_scores)
+    return (sum(all_scores) / len(all_scores)), scores, test_results
 
 
 def get_gini_index(df: pd.DataFrame, path="../resources/results/giniSelection.csv") -> None:
@@ -28,6 +28,6 @@ def get_gini_index(df: pd.DataFrame, path="../resources/results/giniSelection.cs
 
 if __name__ == '__main__':
     df = pd.read_csv("../resources/extracted_features/features.csv")
-    avg = train(df)
+    avg, _, _ = train(df)
     print(avg)
     get_gini_index(df)
