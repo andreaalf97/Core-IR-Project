@@ -56,16 +56,35 @@ if __name__ == '__main__':
         z_t.append(results[f][1])
         o_t.append(results[f][2])
 
-    print(feature)
-    print(z_o)
-    print(z_t)
-    print(o_t)
-
     df = pd.DataFrame()
     df["feature"] = feature
     df["0_1"] = z_o
     df["0_2"] = z_t
     df["1_2"] = o_t
+
+    min01 = 10
+    best01 = ""
+    min02 = 10
+    best02 = ""
+    min12 = 10
+    best12 = ""
+
+    for index, row in df.iterrows():
+        if row["0_1"] < min01:
+            min01 = row["0_1"]
+            best01 = row["feature"]
+
+        if row["0_2"] < min02:
+            min02 = row["0_2"]
+            best02 = row["feature"]
+
+        if row["1_2"] < min12:
+            min12 = row["1_2"]
+            best12 = row["feature"]
+
+    print("Best for 0-1", best01)
+    print("Best for 0-2", best02)
+    print("Best for 1-2", best12)
 
     with open("../resources/results/significancy.csv", "w") as file:
         df.to_csv(file, index=False)
