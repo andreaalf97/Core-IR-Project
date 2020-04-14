@@ -63,7 +63,16 @@ class Model:
 
     def getRankingForQuery(self, queryNumber):
         rankings = []
-        for index, row in self.data.iterrows():
+        if self.useBaseFeatures:
+            if len(self.featuresToAddToBase) > 0:
+                self.rankingData = self.data[self.baseFeatures + self.featuresToAddToBase + self.baseDroppedFeatures]
+            else:
+                self.rankingData = self.data[self.baseFeatures + self.baseDroppedFeatures]
+        elif len(self.featureToRemoveFromTotal):
+            self.rankingData = self.data
+        else:
+            self.rankingData = self.data
+        for index, row in self.rankingData.iterrows():
             if int(row["queryNumber"]) == queryNumber:
                 tableId = row["tableId"]
                 rowFrame = row.to_frame().transpose()
