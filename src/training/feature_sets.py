@@ -25,6 +25,7 @@ for i in range(0, len(featureSets)):
         avg_score = train_model.train(df=df, featuresToAddToBase=[featureSets[i][j]], useBaseFeatures=True)
         print(featureSets[i][j])
         print(avg_score)
+        print(avg_score-base_score)
     #Check all features in list
     print("All")
     avg_score = train_model.train(df=df, featuresToAddToBase=featureSets[i], useBaseFeatures=True)
