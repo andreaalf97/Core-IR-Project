@@ -22,6 +22,7 @@ class Model:
     def extractFeaturesAndLabels(self):
         # Construct features array
         self.labels = self.data["relevance"]
+        #Remove labels from features. We also remove any strings because they can't be converted to floats.
         if self.useBaseFeatures:
             if len(self.featuresToAddToBase) > 0:
                 self.features = self.data[self.baseFeatures + self.featuresToAddToBase]
@@ -34,7 +35,6 @@ class Model:
         else:
             self.features = self.data
             self.features = self.features.drop(self.baseDroppedFeatures, axis=1)
-        #Remove labels from features. We also remove any strings because they can't be converted to floats.
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.features, self.labels,
                                                                                 test_size=0.2, random_state=0,
                                                                                 stratify=self.labels)
