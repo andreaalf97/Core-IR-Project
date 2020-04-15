@@ -6,22 +6,47 @@ import pandas as pd
 
 
 class Model:
-    def __init__(self, data=[]):
+    baseDroppedFeatures = ["relevance", "tableId", "queryContents", "queryNumber"]
+    baseFeatures = ["queryLength", "queryStringLength", "numCols",
+                    "numRows", "firstColHits", "secondColHits", "pageTitle_idf",
+                    "sectionTitle_idf", "tableCaption_idf", "tableHeading_idf",
+                    "tableBody_idf", "all_idf"]
+
+    def __init__(self, data=[], featuresToAddToBase=[], featureToRemoveFromTotal="", useBaseFeatures=False):
         self.data = data
+        self.featuresToAddToBase = featuresToAddToBase
+        self.featureToRemoveFromTotal = featureToRemoveFromTotal
+        self.useBaseFeatures = useBaseFeatures
         self.extractFeaturesAndLabels()
 
     def extractFeaturesAndLabels(self):
         # Construct features array
         self.labels = self.data["relevance"]
-        self.features = self.data
         #Remove labels from features. We also remove any strings because they can't be converted to floats.
-        self.features = self.features.drop(["relevance", "tableId", "queryContents", "queryNumber"], axis=1)
+        if self.useBaseFeatures:
+            if len(self.featuresToAddToBase) > 0:
+                self.features = self.data[self.baseFeatures + self.featuresToAddToBase]
+            else:
+                self.features = self.data[self.baseFeatures]
+        elif len(self.featureToRemoveFromTotal) > 0 :
+            self.features = self.data
+            self.features = self.features.drop(self.baseDroppedFeatures, axis=1)
+            self.features = self.features.drop([self.featureToRemoveFromTotal], axis=1)
+        else:
+            self.features = self.data
+            self.features = self.features.drop(self.baseDroppedFeatures, axis=1)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.features, self.labels,
                                                                                 test_size=0.2, random_state=0,
                                                                                 stratify=self.labels)
 
-    def train(self):
-        self.clf = RandomForestRegressor(max_depth=5, min_samples_split=3, random_state=0, oob_score=True)
+    def train(self, hyperParams={}):
+        max_depth = 5
+        min_sample_split = 3
+        if "max_depth" in hyperParams:
+            max_depth = hyperParams["max_depth"]
+        if "min_sample_split" in hyperParams:
+            min_sample_split = hyperParams["min_sample_split"]
+        self.clf = RandomForestRegressor(max_depth=max_depth, min_samples_split=min_sample_split, random_state=0, oob_score=True)
         results = cross_validate(self.clf, self.features, self.labels, cv=5, verbose=1,
                            scoring=['explained_variance', 'max_error', "neg_mean_squared_error"], n_jobs=-1)
         self.clf.fit(self.X_train, self.y_train)
@@ -38,11 +63,21 @@ class Model:
 
     def getRankingForQuery(self, queryNumber):
         rankings = []
-        for index, row in self.data.iterrows():
+        if self.useBaseFeatures:
+            if len(self.featuresToAddToBase) > 0:
+                self.rankingData = self.data[self.baseFeatures + self.featuresToAddToBase + self.baseDroppedFeatures]
+            else:
+                self.rankingData = self.data[self.baseFeatures + self.baseDroppedFeatures]
+        elif len(self.featureToRemoveFromTotal) > 0:
+            self.rankingData = self.data
+            self.rankingData = self.rankingData.drop([self.featureToRemoveFromTotal], axis=1)
+        else:
+            self.rankingData = self.data
+        for index, row in self.rankingData.iterrows():
             if int(row["queryNumber"]) == queryNumber:
                 tableId = row["tableId"]
                 rowFrame = row.to_frame().transpose()
-                table = rowFrame.drop(["relevance", "tableId", "queryContents"], axis=1)
+                table = rowFrame.drop(self.baseDroppedFeatures, axis=1)
                 cls = self.predict(table)
                 rankings.append([tableId, cls[0]])
         #Sort the rankings by relevance before returning it.
