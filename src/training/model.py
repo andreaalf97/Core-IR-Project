@@ -112,4 +112,4 @@ class Model:
         df["gini_score"] = [element[1] for element in gini_scores]
 
         with open(path, "w") as file:
-            df.to_csv(file)
+            df.to_csv(file, index=False)
