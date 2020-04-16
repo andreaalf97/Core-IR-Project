@@ -11,9 +11,9 @@ import numpy as np
 nltk.download('stopwords')
 queryLoader = QueryLoader()
 
-def remove_prefix(categories, prefix):
+def replace_prefix(categories, prefix, replacement = ''):
     for i in range(0, len(categories)):
-        categories[i] = categories[i].replace(prefix, '')
+        categories[i] = categories[i].replace(prefix, replacement)
     return categories
 
 def remove_duplicates_from_list(items):
@@ -23,7 +23,7 @@ def remove_duplicates_from_list(items):
 # Add bag of something row to the bag
 def addCategoryVectorToBag(vector, bag, index):
     prefix = "http://dbpedia.org/resource/Category:"
-    vector = remove_duplicates_from_list(remove_prefix(vector, prefix))
+    vector = remove_duplicates_from_list(replace_prefix(vector, prefix))
     if len(vector) > 0:
         row = [1]*len(vector)
         rowFrame = pd.DataFrame(data=[row], columns=vector, index=[index])
@@ -36,7 +36,7 @@ def addCategoryVectorToBag(vector, bag, index):
 # Add bag of something row to the bag
 def addResourceVectorToBag(vector, bag, index):
     prefix = "http://dbpedia.org/resource/"
-    vector = remove_duplicates_from_list(remove_prefix(vector, prefix))
+    vector = remove_duplicates_from_list(replace_prefix(vector, prefix))
     if len(vector) > 0:
         row = [1] * len(vector)
         rowFrame = pd.DataFrame(data=[row], columns=vector, index=[index])
