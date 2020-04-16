@@ -24,6 +24,7 @@ early = []
 late_max = []
 late_sum = []
 late_avg = []
+table_vectors_dict: dict = {}
 
 print("Loading w2v dataset...")
 # Loads the word embeddings model
@@ -37,26 +38,9 @@ def get_graph_embeddings(entities):
     bagUtils.replace_prefix(entities, prefix, 'dct:')
     prefix = "http://dbpedia.org/resource/"
     bagUtils.replace_prefix(entities, prefix, 'dbr:')
-    return [nlp.wv[entity] for entity in entities if entity in nlp.wv.vocab]
+    return [np.asarray(nlp.wv[entity]) for entity in entities if entity in nlp.wv.vocab]
 
-
-# Get json data
-# Iterate through query table pairs
-for i in range(0, len(relevance.data)):
-    if currentQuery is not int(relevance.data[i][0]):
-        del queryDf
-        queryDf = pd.DataFrame()
-        currentQuery = int(relevance.data[i][0])
-        print(currentQuery)
-        ts = time.time()
-        print(datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
-        queryTerms = bagUtils.getQueryTerms(currentQuery)
-        for j in range(0, len(queryTerms)):
-            # Use a higher limit to ensure that you get as many entities as possible for matching.
-            entities = dbPediaLoader.get_entity_robust(queryTerms[j], limit=8, excludeCategories=False, onlyDbpedia=True)
-            queryVector = get_graph_embeddings(entities)
-    tableId = relevance.data[i][1]
-    table = table_data[tableId]
+def extract_table_graph_embeddings(table):
     tableVector = []
     if 'pgTitle' in table:
         entities = dbPediaLoader.get_entity_robust(table['pgTitle'], limit=4, excludeCategories=False, onlyDbpedia=True)
@@ -73,8 +57,34 @@ for i in range(0, len(relevance.data)):
     if 'caption' in table:
         entities = dbPediaLoader.get_entity_robust(table['caption'], limit=4, excludeCategories=False, onlyDbpedia=True)
         tableVector += get_graph_embeddings(entities)
+    return tableVector
 
-    fusion_dict = similarity.fusion(tableVector, queryVector)
+# Get json data
+# Iterate through query table pairs
+for i in range(0, len(relevance.data)):
+    if currentQuery is not int(relevance.data[i][0]):
+        del queryDf
+        queryDf = pd.DataFrame()
+        currentQuery = int(relevance.data[i][0])
+        print(currentQuery)
+        ts = time.time()
+        print(datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
+        queryTerms = bagUtils.getQueryTerms(currentQuery)
+        entities = []
+        for j in range(0, len(queryTerms)):
+            # Use a higher limit to ensure that you get as many entities as possible for matching.
+            entities += dbPediaLoader.get_entity_robust(queryTerms[j], limit=8, excludeCategories=False, onlyDbpedia=True)
+        entities = bagUtils.remove_duplicates_from_list(entities)
+        queryVector:list = get_graph_embeddings(entities)
+
+    tableId = relevance.data[i][1]
+    if tableId in table_vectors_dict:
+        tableVector = table_vectors_dict[tableId]
+    else:
+        table = table_data[tableId]
+        tableVector = extract_table_graph_embeddings(table)
+        table_vectors_dict[tableId] = tableVector
+    fusion_dict = similarity.fusion(tableVector, queryVector, 500)
 
     early.append("%.4f" % fusion_dict["early"])
     late_max.append("%.4f" % fusion_dict["late-max"])
