@@ -3,12 +3,45 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 
 
+def significancy(path="results/significancy.csv") -> pd.DataFrame:
+    with open(path, "r") as file:
+        df = pd.read_csv(file)
+
+    a = df.sort_values("0_1")
+    a_val = list(a["0_1"])
+    a = list(a["feature"])
+    print("Minimum for a:", df["0_1"].min())
+    # print(a)
+
+    b = df.sort_values("0_2")
+    b_val = list(b["0_2"])
+    b = list(b["feature"])
+    print("Minimum for b:", df["0_2"].min())
+
+    c = df.sort_values("1_2")
+    c_val = list(c["1_2"])
+    c = list(c["feature"])
+    print("Minimum for c:", df["1_2"].min())
+    print(a)
+    print(b)
+    print(c)
+
+    df = pd.DataFrame()
+    df["0/1"] = a
+    df["p-val(0/1)"] = ["%.2e" % i for i in a_val]
+    df["0_2"] = b
+    df["p-val(0/2)"] = ["%.2e" % i for i in b_val]
+    df["1_2"] = c
+    df["p-val(1/2)"] = ["%.2e" % i for i in c_val]
+
+    df = df.head(n=10)
+    return df
+
+
 def visualize_gini(path="results/giniSelection.csv"):
 
     with open(path, "r") as file:
         df = pd.read_csv(file)
-
-    print(df)
 
     baseFeatures = ["queryLength", "queryStringLength", "numCols",
                     "numRows", "firstColHits", "secondColHits", "pageTitle_idf",

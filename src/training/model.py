@@ -101,7 +101,7 @@ class Model:
         return ndcg_score(y_true=np.asarray([trueScores]), y_score=np.asarray([targetScores]), k=k)
 
     def gini_feature_selection(self, path="../resources/results/giniSelection.csv"):
-        classifier = RandomForestClassifier(max_depth=5, min_samples_split=3, random_state=0, oob_score=True)
+        classifier = RandomForestClassifier(max_depth=11, min_samples_split=3, random_state=0, oob_score=True)
         classifier.fit(self.X_train, self.y_train)
 
         gini_scores = zip(self.features, classifier.feature_importances_)
